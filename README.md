@@ -2,6 +2,8 @@
 
 **Solution**: I created a data pipeline which ends in a Quicksight dashboard to not only help the users to visualize the problem from above, but also to give them product level actionable suggestions.
 
+**Back end**: I created a dataset on Quicksight linking to the original database through Amazon Redshift using this SQL query.
+
 **Structure**: Hierchical rows (manufacturer -> distributors), marketplaces as columns and values as subcolumns.
 
 **Procedure**:
@@ -15,6 +17,6 @@
 
 ![image](https://github.com/pietro-fantini/Distributors-Profitability-Dashboard/assets/136325329/e4acd0bf-b491-4712-aa56-e4ebf51e6bcd)
 
-4. From this product level deep dive (visual on the left) it is possible to target non profitable products. Clicking on them the visual on the right will be filtered, showing all the distributors from which it is possible to source that product, highlighting more profitable solutions.
+4. From this product level deep dive (visual on the left) it is possible to target non profitable products. Clicking on one of them the visual on the right will be filtered, showing all the distributors from which it is possible to source that product, highlighting more profitable solutions.
 
 *data censored for privacy*

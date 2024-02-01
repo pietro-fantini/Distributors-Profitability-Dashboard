@@ -2,7 +2,7 @@
 
 **Solution**: I created a data pipeline which ends in a Quicksight dashboard to not only help the users to visualize the problem from above, but also to give them product level actionable suggestions.
 
-**Back end**: I created a dataset on Quicksight linking to the original database through Amazon Redshift using this SQL query.
+**Back end**: I created a dataset on Quicksight linking to the original database through Amazon Redshift using this SQL_query.
 
 **Structure**: Hierchical rows (manufacturer -> distributors), marketplaces as columns and values as subcolumns.
 

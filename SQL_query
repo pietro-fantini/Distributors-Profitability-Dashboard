@@ -1,0 +1,80 @@
+WITH rates_prel as (
+    SELECT
+        FX_MONTH,
+        SUM(CASE WHEN CURRENCY = 'EUR' THEN CONVERSION ELSE 0 END) AS CURRENCY_EUR,
+        SUM(CASE WHEN CURRENCY = 'GBP' THEN CONVERSION ELSE 0 END) AS CURRENCY_GBP
+    FROM
+        andes.INTL_FIN_DDL.FX_MONTHLY
+    WHERE
+        SCENARIO = 'OP2'
+        AND CURRENCY IN ('EUR','GBP')
+        AND FX_MONTH BETWEEN DATE_TRUNC('YEAR', TO_DATE(GETDATE()-1, 'YYYYMMDD') - 28) AND TO_DATE(GETDATE()-1,'YYYY/MM/DD')
+    GROUP BY
+        FX_MONTH
+),
+rates as (
+SELECT 3 as MARKETPLACE_ID, FX_MONTH, CAST(CURRENCY_GBP/CURRENCY_EUR AS DECIMAL (6,5)) EXCHANGE_RATE
+    FROM RATES_PREL
+    
+    UNION ALL
+    
+    SELECT 1 as MARKETPLACE_ID, FX_MONTH, CAST(1/CURRENCY_EUR AS DECIMAL (6,5)) EXCHANGE_RATE
+    FROM RATES_PREL   
+),
+asin_list as (
+    SELECT DISTINCT 
+        mp.ASIN,
+        mp.region_id,
+        mp.marketplace_id,
+        mp.category_code,
+        mp.subcategory_code,
+        mp.item_name,
+        VH.company_vendor_code as Manu_Company_Code,
+        VH.company as Manu_Company_Name
+    FROM
+        andes.intl_fin_ddl.d_mp_asin_wbr_classifications mp
+    LEFT JOIN andes.BDP_RS.D_VENDOR_HIERARCHY vh ON mp.manufacturer_code = vh.child_vendor_code
+    WHERE
+        mp.REGION_ID = 2
+        AND mp.MARKETPLACE_ID in (3, 4, 5, 35691, 44551)
+        AND mp.subcategory_code in (14700505, 14700510, 14700545, 14700550, 14700555, 14700565, 14700570, 14700560)
+        AND mp.gl_product_group in (147)
+)
+
+SELECT
+
+dmp.ASIN
+,dmp.marketplace_id
+,owce.ship_day as day
+,dmp.Manu_Company_Code
+,dmp.Manu_Company_Name
+,vh.Company_Vendor_code as Company_Code
+,vh.company as Company_Name
+,rw.CALENDAR_YEAR AS YEAR
+,rw.CALENDAR_QTR AS QUARTER
+,rw.CALENDAR_MONTH_OF_YEAR AS MONTH
+,rw.reporting_week_of_year AS WEEK
+,sum(owce.contribution_profit_amt)*nvl(RATES.EXCHANGE_RATE,1) as CP
+,(sum(owce.revenue_share_amt) + sum(owce.fulfillment_fees_amt) + sum(owce.giftwrap_revenue_amt) + sum(owce.shipping_revenue_amt) + sum(owce.subscription_revenue_amt) + sum(owce.closing_fees_amt) - sum(owce.sales_discounts_amt) - sum(owce.refunds_revenue_amt) + sum(owce.liquidation_revenue_amt) + sum(owce.wd_liquidation_revenue_amt) + sum(owce.other_revenue_amt) - sum(owce.seller_credits_amt))*nvl(RATES.EXCHANGE_RATE,1) as Total_Revenue                  
+,sum(owce.revenue_share_amt)*nvl(RATES.EXCHANGE_RATE,1) as Revenue
+,(sum(owce.revenue_share_amt) - sum(owce.PRODUCT_COGS_AMT) + sum(owce.DISCRETIONARY_COOP_AMT) + Sum(owce.QUICK_PAY_DISCOUNTS_AMT) + sum(owce.VENDOR_ALLOWANCES_AMT) - sum(owce.SALES_DISCOUNTS_AMT))*nvl(RATES.EXCHANGE_RATE,1) as Num_Net_PPM
+,sum(owce.product_cogs_amt)*nvl(RATES.EXCHANGE_RATE,1) as PCOGS
+
+from andes.contribution_ddl.O_WBR_CP_EU owce
+
+INNER JOIN asin_list dmp
+    ON owce.asin = dmp.ASIN AND owce.marketplace_id = dmp.marketplace_id
+    
+INNER JOIN andes.BDP_RS.D_VENDOR_HIERARCHY vh ON owce.vendor_id = vh.child_vendor_code
+
+LEFT JOIN RATES ON rates.marketplace_id = owce.marketplace_id and DATE_TRUNC('month',owce.ship_day) = RATES.FX_MONTH
+
+LEFT JOIN andes.booker.O_REPORTING_DAYS rw ON owce.ship_day = rw.calendar_day
+
+WHERE
+
+ship_day >= to_date('2023/01/01','YYYY/MM/DD')
+AND channel_type < 2000
+
+GROUP BY
+1,2,3,4,5,6,7,8,9,10,11,RATES.EXCHANGE_RATE

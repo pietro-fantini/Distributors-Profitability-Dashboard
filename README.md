@@ -2,9 +2,14 @@
 
 **Solution**: I created a data pipeline which ends in a Quicksight dashboard to not only help the users to visualize the problem from above, but also to give them product level actionable suggestions.
 
-**Back end**: I created a dataset on Quicksight linking to the original database through Amazon Redshift using this [SQL query](https://github.com/pietro-fantini/Distributors-Profitability-Dashboard/blob/main/SQL_query).
+**Back end**: I created a dataset on Quicksight querying the data through Amazon Redshift using this [SQL query](https://github.com/pietro-fantini/Distributors-Profitability-Dashboard/blob/main/SQL_query).
 
-**Structure**: Hierchical rows (manufacturer -> distributors), marketplaces as columns and values as subcolumns.
+**Problem**: The stakeholders I shared this dashboard with asked expand it to a broader audience. Quicksight has a very tight query time limitation, therefore I tackled this problem by:
+1. Creating my own table.
+2. Subscribe that to relevant clusters.
+3. Create an ETL transform job with my SQL query to feed the data lake.
+4. Create an ETL load job to fill the table with data.
+5. Simply quering this table on Quicksight to avoid time limitation.
 
 **Procedure**:
 1. Select the period and the dynamic controls as needed.

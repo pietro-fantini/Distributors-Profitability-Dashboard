@@ -14,7 +14,7 @@
 **Procedure**:
 1. Select the period and the dynamic controls as needed.
 
-![image](https://github.com/pietro-fantini/Distributors-Profitability-Dashboard/assets/136325329/9bdc83d9-b321-4806-a459-9937cd18ac70)
+![first distributor](https://github.com/pietro-fantini/Distributors-Profitability-Dashboard/assets/136325329/43690c49-8676-4be2-84b1-fc9ba33bd1d3)
 
 2. Click on any particular cell (which will be the combination of a manufacturer, distributor and marketplace) and a drill down action will occur, opening a new sheet. Use case: deep dive on a particularly non profitable distributor in a marketplace.
 
